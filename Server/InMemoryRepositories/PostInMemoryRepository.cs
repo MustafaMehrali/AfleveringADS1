@@ -5,8 +5,15 @@ namespace InMemoryRepositories;
 
 public class PostInMemoryRepository : IPostRepository
 {
-    private readonly List<Post> posts = new List<Post>();
     
+    private readonly List<Post> posts = new List<Post>();
+    public PostInMemoryRepository()
+    {
+        // Dummy data
+        posts.Add(new Post { Id = 1, Title = "Hello World", Body = "Mit første post!", UserId = 1 });
+        posts.Add(new Post { Id = 2, Title = "Nyheder", Body = "I dag er det solskin.", UserId = 2 });
+        posts.Add(new Post { Id = 3, Title = "Spørgsmål", Body = "Hvordan virker async i C#?", UserId = 1 });
+    }
     public Task<Post> AddAsync(Post post)
     {
         post.Id = posts.Any()

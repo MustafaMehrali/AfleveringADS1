@@ -7,7 +7,13 @@ namespace InMemoryRepositories;
 public class CommentInMemoryRepository : ICommentRepository
 {
     private readonly List<Comment> comments = new List<Comment>();
-
+    public CommentInMemoryRepository()
+    {
+        // Dummy data
+        comments.Add(new Comment { Id = 1, Body = "God post!", UserId = 2, PostId = 1 });
+        comments.Add(new Comment { Id = 2, Body = "Det giver mening.", UserId = 1, PostId = 2 });
+        comments.Add(new Comment { Id = 3, Body = "Tak for svaret.", UserId = 3, PostId = 3 });
+    }
     public Task<Comment> AddAsync(Comment comment)
     {
         comment.Id = comments.Any() ? comments.Max(c => c.Id) + 1 : 1;
