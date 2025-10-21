@@ -117,7 +117,7 @@ public class UsersController : ControllerBase
     // PUT /api/users/{id}
     // Vi bruger UserDto som input for at holde samme stil (UserName uden Password)
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update(int id, [FromBody] UserDto request)
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateUserDto request)
     {
         if (id != request.Id)
             return BadRequest("Route id and body id must match.");
@@ -132,19 +132,16 @@ public class UsersController : ControllerBase
             return NotFound();
         }
 
-        // Hvis brugernavnet ændres, kan du tjekke for dubletter:
-        if (!string.Equals(existing.Username, request.Username))
+        if (!string.Equals(existing.Username, request.UserName))
         {
-            await VerifyUserNameIsAvailableAsync(request.Username);
+            await VerifyUserNameIsAvailableAsync(request.UserName);
         }
 
-        existing.Username = request.Username;
-        // existing.Password forbliver uændret (UserDto indeholder ikke password)
+        existing.Username = request.UserName;
 
         await userRepo.UpdateAsync(existing);
         return NoContent();
     }
-
     // ---------- Delete ----------
     // DELETE /api/users/{id}
     [HttpDelete("{id:int}")]
