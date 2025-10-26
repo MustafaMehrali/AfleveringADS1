@@ -28,7 +28,7 @@
                         </div>
                     }
 
-                    <EditForm Model="@newPost" OnValidSubmit="@CreatePost">
+                    <EditForm Model="@newPost" OnValidSubmit="@HandleCreatePost">
                         <DataAnnotationsValidator />
                         <ValidationSummary />
 
@@ -79,7 +79,7 @@
     private string successMessage = "";
     private bool isCreating = false;
 
-    private async Task CreatePost()
+    private async Task HandleCreatePost()
     {
         errorMessage = "";
         successMessage = "";

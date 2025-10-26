@@ -28,7 +28,7 @@
                         </div>
                     }
 
-                    <EditForm Model="@newUser" OnValidSubmit="@CreateUser">
+                    <EditForm Model="@newUser" OnValidSubmit="@HandleCreateUser">
                         <DataAnnotationsValidator />
                         <ValidationSummary />
 
@@ -74,7 +74,7 @@
     private string successMessage = "";
     private bool isCreating = false;
 
-    private async Task CreateUser()
+    private async Task HandleCreateUser()
     {
         errorMessage = "";
         successMessage = "";
