@@ -7,7 +7,7 @@ using RepositoryContracts;
 namespace WebApplication1.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")] // Changed from [controller] to api/[controller]
 public class PostsController : ControllerBase
 {
     private readonly IPostRepository _posts;
@@ -19,9 +19,9 @@ public class PostsController : ControllerBase
 
     public PostsController(IPostRepository posts, ICommentRepository comments, IUserRepository users)
     {
-        _posts = posts;        // :contentReference[oaicite:1]{index=1}
-        _comments = comments;  // :contentReference[oaicite:2]{index=2}
-        _users = users;        // :contentReference[oaicite:3]{index=3}
+        _posts = posts;
+        _comments = comments;
+        _users = users;
     }
 
     // Create
@@ -70,9 +70,6 @@ public class PostsController : ControllerBase
     }
 
     // GetMany (filters + pagination + includes)
-    // Examples:
-    //   GET /api/posts?userId=2
-    //   GET /api/posts?search=hello&skip=0&take=20&includeAuthor=true
     [HttpGet]
     public ActionResult<IEnumerable<object>> GetMany(
         [FromQuery] int? userId,
@@ -84,7 +81,7 @@ public class PostsController : ControllerBase
     {
         if (take is < 1 or > 200) return BadRequest("take must be between 1 and 200.");
 
-        var query = _posts.GetMany(); // IQueryable<Post> :contentReference[oaicite:4]{index=4}
+        var query = _posts.GetMany();
 
         if (userId.HasValue)
             query = query.Where(p => p.UserId == userId.Value);

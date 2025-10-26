@@ -7,14 +7,14 @@ using RepositoryContracts;
 namespace WebApplication1.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")] // Changed from [controller] to api/[controller]
 public class CommentsController : ControllerBase
 {
     private readonly ICommentRepository _comments;
 
     public CommentsController(ICommentRepository comments)
     {
-        _comments = comments; // :contentReference[oaicite:9]{index=9}
+        _comments = comments;
     }
 
     // Create
@@ -43,9 +43,6 @@ public class CommentsController : ControllerBase
     }
 
     // GetMany: filter by postId and/or userId, plus search in body
-    // Examples:
-    //   GET /api/comments?postId=3
-    //   GET /api/comments?userId=2&search=nice
     [HttpGet]
     public ActionResult<IEnumerable<Comment>> GetMany(
         [FromQuery] int? postId,
@@ -56,7 +53,7 @@ public class CommentsController : ControllerBase
     {
         if (take is < 1 or > 500) return BadRequest("take must be between 1 and 500.");
 
-        var query = _comments.GetMany(); // IQueryable<Comment> :contentReference[oaicite:10]{index=10}
+        var query = _comments.GetMany();
 
         if (postId.HasValue) query = query.Where(c => c.PostId == postId.Value);
         if (userId.HasValue) query = query.Where(c => c.UserId == userId.Value);

@@ -15,7 +15,7 @@ public class HttpCommentService : ICommentService
 
     public async Task<Comment> CreateAsync(CreateCommentDto request)
     {
-        HttpResponseMessage httpResponse = await client.PostAsJsonAsync("comments", request);
+        HttpResponseMessage httpResponse = await client.PostAsJsonAsync("api/comments", request);
         string response = await httpResponse.Content.ReadAsStringAsync();
         
         if (!httpResponse.IsSuccessStatusCode)
@@ -31,7 +31,7 @@ public class HttpCommentService : ICommentService
 
     public async Task<Comment> GetSingleAsync(int id)
     {
-        HttpResponseMessage httpResponse = await client.GetAsync($"comments/{id}");
+        HttpResponseMessage httpResponse = await client.GetAsync($"api/comments/{id}");
         string response = await httpResponse.Content.ReadAsStringAsync();
         
         if (!httpResponse.IsSuccessStatusCode)
@@ -47,7 +47,7 @@ public class HttpCommentService : ICommentService
 
     public async Task<IEnumerable<Comment>> GetManyAsync(int? postId = null, int? userId = null, string? search = null, int skip = 0, int take = 100)
     {
-        string query = $"comments?skip={skip}&take={take}";
+        string query = $"api/comments?skip={skip}&take={take}";
         
         if (postId.HasValue)
         {
@@ -80,7 +80,7 @@ public class HttpCommentService : ICommentService
 
     public async Task UpdateAsync(int id, UpdateCommentDto request)
     {
-        HttpResponseMessage httpResponse = await client.PutAsJsonAsync($"comments/{id}", request);
+        HttpResponseMessage httpResponse = await client.PutAsJsonAsync($"api/comments/{id}", request);
         
         if (!httpResponse.IsSuccessStatusCode)
         {
@@ -91,7 +91,7 @@ public class HttpCommentService : ICommentService
 
     public async Task DeleteAsync(int id)
     {
-        HttpResponseMessage httpResponse = await client.DeleteAsync($"comments/{id}");
+        HttpResponseMessage httpResponse = await client.DeleteAsync($"api/comments/{id}");
         
         if (!httpResponse.IsSuccessStatusCode)
         {
@@ -102,7 +102,7 @@ public class HttpCommentService : ICommentService
 
     public async Task<IEnumerable<Comment>> GetCommentsForPostAsync(int postId)
     {
-        HttpResponseMessage httpResponse = await client.GetAsync($"posts/{postId}/comments");
+        HttpResponseMessage httpResponse = await client.GetAsync($"api/posts/{postId}/comments");
         string response = await httpResponse.Content.ReadAsStringAsync();
         
         if (!httpResponse.IsSuccessStatusCode)
@@ -118,7 +118,7 @@ public class HttpCommentService : ICommentService
 
     public async Task<Comment> AddCommentToPostAsync(int postId, CreateCommentDto request)
     {
-        HttpResponseMessage httpResponse = await client.PostAsJsonAsync($"posts/{postId}/comments", request);
+        HttpResponseMessage httpResponse = await client.PostAsJsonAsync($"api/posts/{postId}/comments", request);
         string response = await httpResponse.Content.ReadAsStringAsync();
         
         if (!httpResponse.IsSuccessStatusCode)

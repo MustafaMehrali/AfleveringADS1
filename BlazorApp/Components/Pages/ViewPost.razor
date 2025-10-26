@@ -1,0 +1,189 @@
+﻿@page "/posts/{PostId:int}"
+@using BlazorApp.Services
+@using Entities
+@using ApiContracts.DTOs
+@inject IPostService PostService
+@inject ICommentService CommentService
+@inject NavigationManager Navigation
+
+<PageTitle>@(post?.Title ?? "Loading...")</PageTitle>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+
+@if (isLoading)
+{
+    <div class="text-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else if (post != null)
+{
+    <div class="mb-3">
+        <a href="/posts" class="btn btn-secondary">← Tilbage til posts</a>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>@post.Title</h2>
+            <small class="text-muted">Af bruger ID: @post.UserId</small>
+        </div>
+        <div class="card-body">
+            <p class="card-text" style="white-space: pre-wrap;">@post.Body</p>
+        </div>
+    </div>
+
+    <h4>Kommentarer (@comments.Count())</h4>
+
+    @if (comments.Any())
+    {
+        <div class="list-group mb-4">
+            @foreach (var comment in comments)
+            {
+                <div class="list-group-item">
+                    <div class="d-flex w-100 justify-content-between">
+                        <small class="text-muted">Bruger ID: @comment.UserId</small>
+                        <small class="text-muted">ID: @comment.Id</small>
+                    </div>
+                    <p class="mb-1">@comment.Body</p>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info" role="alert">
+            Ingen kommentarer endnu. Vær den første til at kommentere!
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-header">
+            <h5>Tilføj kommentar</h5>
+        </div>
+        <div class="card-body">
+            @if (!string.IsNullOrEmpty(commentErrorMessage))
+            {
+                <div class="alert alert-danger" role="alert">
+                    @commentErrorMessage
+                </div>
+            }
+
+            <EditForm Model="@newComment" OnValidSubmit="@AddComment">
+                <div class="mb-3">
+                    <label for="commentBody" class="form-label">Din kommentar:</label>
+                    <InputTextArea id="commentBody" class="form-control" rows="3" @bind-Value="newComment.Body" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">User ID: @newComment.UserId (hardcoded for now)</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary" disabled="@isAddingComment">
+                    @if (isAddingComment)
+                    {
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <span>Tilføjer...</span>
+                    }
+                    else
+                    {
+                        <span>Tilføj kommentar</span>
+                    }
+                </button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int PostId { get; set; }
+
+    private Post? post;
+    private IEnumerable<Comment> comments = new List<Comment>();
+    private CreateCommentDto newComment = new CreateCommentDto 
+    { 
+        Body = "",
+        UserId = 1, // Hardcoded - will be replaced with logged in user later
+        PostId = 0
+    };
+
+    private string errorMessage = "";
+    private string commentErrorMessage = "";
+    private bool isLoading = true;
+    private bool isAddingComment = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPost();
+    }
+
+    private async Task LoadPost()
+    {
+        isLoading = true;
+        errorMessage = "";
+
+        try
+        {
+            post = await PostService.GetSingleAsync(PostId);
+            await LoadComments();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Fejl ved indlæsning af post: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task LoadComments()
+    {
+        try
+        {
+            comments = await CommentService.GetCommentsForPostAsync(PostId);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Fejl ved indlæsning af kommentarer: {ex.Message}";
+        }
+    }
+
+    private async Task AddComment()
+    {
+        commentErrorMessage = "";
+        isAddingComment = true;
+
+        try
+        {
+            newComment.PostId = PostId;
+            await CommentService.AddCommentToPostAsync(PostId, newComment);
+            
+            // Reset form
+            newComment = new CreateCommentDto 
+            { 
+                Body = "",
+                UserId = 1,
+                PostId = 0
+            };
+
+            // Reload comments
+            await LoadComments();
+        }
+        catch (Exception ex)
+        {
+            commentErrorMessage = $"Fejl ved tilføjelse af kommentar: {ex.Message}";
+        }
+        finally
+        {
+            isAddingComment = false;
+        }
+    }
+}

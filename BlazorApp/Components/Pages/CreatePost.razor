@@ -1,0 +1,82 @@
+﻿@page "/create-post"
+@using BlazorApp.Services
+@using ApiContracts.DTOs
+@inject IPostService PostService
+@inject NavigationManager Navigation
+
+<PageTitle>Opret Post</PageTitle>
+
+<h3>Opret nyt post</h3>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+
+<div class="card">
+    <div class="card-body">
+        <EditForm Model="@createPostDto" OnValidSubmit="@CreatePost">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <label for="title" class="form-label">Titel:</label>
+                <InputText id="title" class="form-control" @bind-Value="createPostDto.Title" />
+            </div>
+
+            <div class="mb-3">
+                <label for="body" class="form-label">Indhold:</label>
+                <InputTextArea id="body" class="form-control" rows="5" @bind-Value="createPostDto.Body" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">User ID: @createPostDto.UserId (hardcoded for now)</label>
+            </div>
+
+            <button type="submit" class="btn btn-primary" disabled="@isLoading">
+                @if (isLoading)
+                {
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span>Opretter...</span>
+                }
+                else
+                {
+                    <span>Opret post</span>
+                }
+            </button>
+            <button type="button" class="btn btn-secondary" @onclick="@(() => Navigation.NavigateTo("/posts"))">
+                Annuller
+            </button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private CreatePostDto createPostDto = new CreatePostDto 
+    { 
+        Title = "", 
+        Body = "",
+        UserId = 1 // Hardcoded - will be replaced with logged in user later
+    };
+    private string errorMessage = "";
+    private bool isLoading = false;
+
+    private async Task CreatePost()
+    {
+        errorMessage = "";
+        isLoading = true;
+
+        try
+        {
+            var result = await PostService.CreateAsync(createPostDto);
+            Navigation.NavigateTo($"/posts/{result.Id}");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Fejl: {ex.Message}";
+            isLoading = false;
+        }
+    }
+}

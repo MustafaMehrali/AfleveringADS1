@@ -15,7 +15,7 @@ public class HttpPostService : IPostService
 
     public async Task<Post> CreateAsync(CreatePostDto request)
     {
-        HttpResponseMessage httpResponse = await client.PostAsJsonAsync("posts", request);
+        HttpResponseMessage httpResponse = await client.PostAsJsonAsync("api/posts", request);
         string response = await httpResponse.Content.ReadAsStringAsync();
         
         if (!httpResponse.IsSuccessStatusCode)
@@ -31,7 +31,7 @@ public class HttpPostService : IPostService
 
     public async Task<Post> GetSingleAsync(int id, bool includeComments = false, bool includeAuthor = false)
     {
-        string query = $"posts/{id}?includeComments={includeComments}&includeAuthor={includeAuthor}";
+        string query = $"api/posts/{id}?includeComments={includeComments}&includeAuthor={includeAuthor}";
         
         HttpResponseMessage httpResponse = await client.GetAsync(query);
         string response = await httpResponse.Content.ReadAsStringAsync();
@@ -49,7 +49,7 @@ public class HttpPostService : IPostService
 
     public async Task<IEnumerable<Post>> GetManyAsync(int? userId = null, string? search = null, int skip = 0, int take = 50, bool includeComments = false, bool includeAuthor = false)
     {
-        string query = $"posts?skip={skip}&take={take}&includeComments={includeComments}&includeAuthor={includeAuthor}";
+        string query = $"api/posts?skip={skip}&take={take}&includeComments={includeComments}&includeAuthor={includeAuthor}";
         
         if (userId.HasValue)
         {
@@ -77,7 +77,7 @@ public class HttpPostService : IPostService
 
     public async Task UpdateAsync(int id, UpdatePostDto request)
     {
-        HttpResponseMessage httpResponse = await client.PutAsJsonAsync($"posts/{id}", request);
+        HttpResponseMessage httpResponse = await client.PutAsJsonAsync($"api/posts/{id}", request);
         
         if (!httpResponse.IsSuccessStatusCode)
         {
@@ -88,7 +88,7 @@ public class HttpPostService : IPostService
 
     public async Task DeleteAsync(int id)
     {
-        HttpResponseMessage httpResponse = await client.DeleteAsync($"posts/{id}");
+        HttpResponseMessage httpResponse = await client.DeleteAsync($"api/posts/{id}");
         
         if (!httpResponse.IsSuccessStatusCode)
         {
