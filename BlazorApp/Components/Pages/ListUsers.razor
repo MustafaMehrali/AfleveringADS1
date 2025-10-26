@@ -1,0 +1,78 @@
+@page "/users"
+@using BlazorApp.Services
+@using ApiContracts.DTOs
+@inject IUserService UserService
+
+<PageTitle>Users</PageTitle>
+
+<h3>Alle Brugere</h3>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+
+<div class="mb-3">
+    <a href="/create-user" class="btn btn-primary">Opret ny bruger</a>
+</div>
+
+@if (isLoading)
+{
+    <div class="text-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else if (users == null || !users.Any())
+{
+    <div class="alert alert-info" role="alert">
+        Ingen brugere fundet.
+    </div>
+}
+else
+{
+    <div class="list-group">
+        @foreach (var user in users)
+        {
+            <div class="list-group-item">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">@user.Username</h5>
+                    <small>ID: @user.Id</small>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private IEnumerable<UserDto> users = new List<UserDto>();
+    private string errorMessage = "";
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        isLoading = true;
+        errorMessage = "";
+
+        try
+        {
+            users = await UserService.GetUsersAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Fejl ved indlæsning af brugere: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

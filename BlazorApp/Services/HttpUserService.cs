@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using ApiContracts.DTOs;
 
 namespace BlazorApp.Services;
@@ -64,6 +64,12 @@ public class HttpUserService : IUserService
         {
             PropertyNameCaseInsensitive = true
         })!;
+    }
+
+    public async Task<IEnumerable<UserDto>> GetUsersAsync()
+    {
+        // Convenience method that calls GetManyAsync with default parameters
+        return await GetManyAsync(null, 0, 100);
     }
 
     public async Task UpdateUserAsync(int id, UpdateUserDto request)

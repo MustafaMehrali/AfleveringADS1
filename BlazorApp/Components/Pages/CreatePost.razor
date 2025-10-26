@@ -1,0 +1,120 @@
+@page "/create-post"
+@using BlazorApp.Services
+@using ApiContracts.DTOs
+@inject IPostService PostService
+@inject NavigationManager Navigation
+
+<PageTitle>Opret Post</PageTitle>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Opret Nyt Post</h3>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            @errorMessage
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success" role="alert">
+                            @successMessage
+                        </div>
+                    }
+
+                    <EditForm Model="@newPost" OnValidSubmit="@CreatePost">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Titel:</label>
+                            <InputText id="title" class="form-control" @bind-Value="newPost.Title" placeholder="Indtast titel" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="body" class="form-label">Indhold:</label>
+                            <InputTextArea id="body" class="form-control" rows="8" @bind-Value="newPost.Body" placeholder="Skriv dit indlæg her..." />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Forfatter: User ID @newPost.UserId (hardcoded indtil login er implementeret)</label>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary" disabled="@isCreating">
+                                @if (isCreating)
+                                {
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <span>Opretter...</span>
+                                }
+                                else
+                                {
+                                    <span>Opret Post</span>
+                                }
+                            </button>
+                            <a href="/posts" class="btn btn-secondary">Annuller</a>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private CreatePostDto newPost = new CreatePostDto
+    {
+        Title = "",
+        Body = "",
+        UserId = 1 // Hardcoded - will be replaced with logged in user in Part 6
+    };
+
+    private string errorMessage = "";
+    private string successMessage = "";
+    private bool isCreating = false;
+
+    private async Task CreatePost()
+    {
+        errorMessage = "";
+        successMessage = "";
+        isCreating = true;
+
+        try
+        {
+            if (string.IsNullOrWhiteSpace(newPost.Title))
+            {
+                errorMessage = "Titel må ikke være tom.";
+                isCreating = false;
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(newPost.Body))
+            {
+                errorMessage = "Indhold må ikke være tomt.";
+                isCreating = false;
+                return;
+            }
+
+            var createdPost = await PostService.CreateAsync(newPost);
+            successMessage = $"Post '{createdPost.Title}' blev oprettet med ID: {createdPost.Id}";
+
+            // Wait 2 seconds to show success message, then navigate to the post
+            await Task.Delay(2000);
+            Navigation.NavigateTo($"/posts/{createdPost.Id}");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Fejl ved oprettelse af post: {ex.Message}";
+        }
+        finally
+        {
+            isCreating = false;
+        }
+    }
+}

@@ -1,18 +1,59 @@
-﻿@page "/"
+@page "/"
 
 <PageTitle>Home</PageTitle>
 
-<h1>Velkommen til Forum App</h1>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12 text-center mb-5">
+            <h1 class="display-3">Velkommen til Forum App</h1>
+            <p class="lead">DNP Assignment 5 - Blazor Forum Application</p>
+        </div>
+    </div>
 
-<p>
-    Dette er en simpel forum applikation bygget med Blazor og ASP.NET Core Web API.
-</p>
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title">📝 Posts</h3>
+                    <p class="card-text">Læs og opret posts i forummet. Del dine tanker og ideer med andre brugere.</p>
+                    <div class="d-grid gap-2">
+                        <a href="/posts" class="btn btn-primary">Se alle posts</a>
+                        <a href="/create-post" class="btn btn-outline-primary">Opret nyt post</a>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<div class="alert alert-info" role="alert">
-    <h4 class="alert-heading">Kom i gang:</h4>
-    <ul>
-        <li>Se <a href="/posts">alle posts</a></li>
-        <li><a href="/create-post">Opret et nyt post</a></li>
-        <li><a href="/create-user">Opret en ny bruger</a></li>
-    </ul>
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title">👥 Brugere</h3>
+                    <p class="card-text">Se alle brugere i systemet og opret nye brugere til at deltage i forummet.</p>
+                    <div class="d-grid gap-2">
+                        <a href="/users" class="btn btn-success">Se alle brugere</a>
+                        <a href="/create-user" class="btn btn-outline-success">Opret ny bruger</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="alert alert-info" role="alert">
+                <h4 class="alert-heading">Om dette projekt</h4>
+                <p>Dette er en forum applikation bygget med Blazor og ASP.NET Core Web API som en del af DNP Assignment 5.</p>
+                <hr>
+                <p class="mb-0">
+                    <strong>Features:</strong>
+                    <ul>
+                        <li>Opret og se posts</li>
+                        <li>Tilføj kommentarer til posts</li>
+                        <li>Bruger management</li>
+                        <li>Søgning i posts og brugere</li>
+                    </ul>
+                </p>
+            </div>
+        </div>
+    </div>
 </div>

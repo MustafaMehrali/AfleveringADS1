@@ -1,0 +1,122 @@
+@page "/create-user"
+@using BlazorApp.Services
+@using ApiContracts.DTOs
+@inject IUserService UserService
+@inject NavigationManager Navigation
+
+<PageTitle>Opret Bruger</PageTitle>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Opret Ny Bruger</h3>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            @errorMessage
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success" role="alert">
+                            @successMessage
+                        </div>
+                    }
+
+                    <EditForm Model="@newUser" OnValidSubmit="@CreateUser">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Brugernavn:</label>
+                            <InputText id="username" class="form-control" @bind-Value="newUser.UserName" placeholder="Indtast brugernavn" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Adgangskode:</label>
+                            <InputText id="password" type="password" class="form-control" @bind-Value="newUser.Password" placeholder="Indtast adgangskode" />
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary" disabled="@isCreating">
+                                @if (isCreating)
+                                {
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <span>Opretter...</span>
+                                }
+                                else
+                                {
+                                    <span>Opret Bruger</span>
+                                }
+                            </button>
+                            <a href="/users" class="btn btn-secondary">Annuller</a>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private CreateUserDto newUser = new CreateUserDto
+    {
+        UserName = "",
+        Password = ""
+    };
+
+    private string errorMessage = "";
+    private string successMessage = "";
+    private bool isCreating = false;
+
+    private async Task CreateUser()
+    {
+        errorMessage = "";
+        successMessage = "";
+        isCreating = true;
+
+        try
+        {
+            if (string.IsNullOrWhiteSpace(newUser.UserName))
+            {
+                errorMessage = "Brugernavn må ikke være tomt.";
+                isCreating = false;
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(newUser.Password))
+            {
+                errorMessage = "Adgangskode må ikke være tom.";
+                isCreating = false;
+                return;
+            }
+
+            var createdUser = await UserService.AddUserAsync(newUser);
+            successMessage = $"Bruger '{createdUser.Username}' blev oprettet med ID: {createdUser.Id}";
+
+            // Reset form
+            newUser = new CreateUserDto
+            {
+                UserName = "",
+                Password = ""
+            };
+
+            // Navigate to users list after 2 seconds
+            await Task.Delay(2000);
+            Navigation.NavigateTo("/users");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Fejl ved oprettelse af bruger: {ex.Message}";
+        }
+        finally
+        {
+            isCreating = false;
+        }
+    }
+}
