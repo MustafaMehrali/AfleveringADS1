@@ -1,4 +1,5 @@
 @page "/create-post"
+@attribute [Authorize]
 @using BlazorApp.Services
 @using ApiContracts.DTOs
 @inject IPostService PostService
@@ -6,78 +7,105 @@
 
 <PageTitle>Opret Post</PageTitle>
 
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <div class="card">
-                <div class="card-header">
-                    <h3>Opret Nyt Post</h3>
-                </div>
-                <div class="card-body">
-                    @if (!string.IsNullOrEmpty(errorMessage))
-                    {
-                        <div class="alert alert-danger" role="alert">
-                            @errorMessage
+<AuthorizeView>
+    <Authorized>
+        <div class="container mt-4">
+            <div class="row">
+                <div class="col-md-8 offset-md-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Opret Nyt Post</h3>
                         </div>
-                    }
+                        <div class="card-body">
+                            @if (!string.IsNullOrEmpty(errorMessage))
+                            {
+                                <div class="alert alert-danger" role="alert">
+                                    @errorMessage
+                                </div>
+                            }
 
-                    @if (!string.IsNullOrEmpty(successMessage))
-                    {
-                        <div class="alert alert-success" role="alert">
-                            @successMessage
+                            @if (!string.IsNullOrEmpty(successMessage))
+                            {
+                                <div class="alert alert-success" role="alert">
+                                    @successMessage
+                                </div>
+                            }
+
+                            <EditForm Model="@newPost" OnValidSubmit="@HandleCreatePost">
+                                <DataAnnotationsValidator />
+                                <ValidationSummary />
+
+                                <div class="mb-3">
+                                    <label for="title" class="form-label">Titel:</label>
+                                    <InputText id="title" class="form-control" @bind-Value="newPost.Title" placeholder="Indtast titel" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="body" class="form-label">Indhold:</label>
+                                    <InputTextArea id="body" class="form-control" rows="8" @bind-Value="newPost.Body" placeholder="Skriv dit indlæg her..." />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">User ID: @userId</label>
+                                </div>
+
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary" disabled="@isCreating">
+                                        @if (isCreating)
+                                        {
+                                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                            <span>Opretter...</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Opret Post</span>
+                                        }
+                                    </button>
+                                    <a href="/posts" class="btn btn-secondary">Annuller</a>
+                                </div>
+                            </EditForm>
                         </div>
-                    }
-
-                    <EditForm Model="@newPost" OnValidSubmit="@HandleCreatePost">
-                        <DataAnnotationsValidator />
-                        <ValidationSummary />
-
-                        <div class="mb-3">
-                            <label for="title" class="form-label">Titel:</label>
-                            <InputText id="title" class="form-control" @bind-Value="newPost.Title" placeholder="Indtast titel" />
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="body" class="form-label">Indhold:</label>
-                            <InputTextArea id="body" class="form-control" rows="8" @bind-Value="newPost.Body" placeholder="Skriv dit indlæg her..." />
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Forfatter: User ID @newPost.UserId (hardcoded indtil login er implementeret)</label>
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary" disabled="@isCreating">
-                                @if (isCreating)
-                                {
-                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                    <span>Opretter...</span>
-                                }
-                                else
-                                {
-                                    <span>Opret Post</span>
-                                }
-                            </button>
-                            <a href="/posts" class="btn btn-secondary">Annuller</a>
-                        </div>
-                    </EditForm>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
+    </Authorized>
+    <NotAuthorized>
+        <p>Du skal være logget ind for at oprette posts.</p>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthState { get; set; } = null!;
+
     private CreatePostDto newPost = new CreatePostDto
     {
         Title = "",
         Body = "",
-        UserId = 1 // Hardcoded - will be replaced with logged in user in Part 6
+        UserId = 0 // Will be set from logged in user
     };
 
     private string errorMessage = "";
     private string successMessage = "";
     private bool isCreating = false;
+    private int userId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthState;
+        var user = authState.User;
+        
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            var userIdClaim = user.FindFirst(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (userIdClaim != null)
+            {
+                userId = int.Parse(userIdClaim.Value);
+                newPost.UserId = userId;
+            }
+        }
+    }
 
     private async Task HandleCreatePost()
     {
